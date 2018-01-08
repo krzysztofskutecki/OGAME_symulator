@@ -100,12 +100,14 @@ class Labirynt:
             if self.lines[x+1][y] == '$' or self.lines[x][y-1] == '$' or self.lines[x-1][y] == '$' or self.lines[x][y+1] == '$':
                 return 'UDALO SIE ZNALEZC WYJSCIE Z LABIRYNTU',self.lines
 
+
 t1 = time.time()
 L1=Labirynt()
 L1.findstart()
 L1.find_path_no_recursion()
 #L1.findpath()
 print time.time() - t1
+    
     
     
 
