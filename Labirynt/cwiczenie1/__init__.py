@@ -1,100 +1,115 @@
-with open('/home/student/Pulpit/labirynt0.txt') as f:
-  read_data = f.readlines()
-  
-print read_data
+# -*- coding: utf-8 -*-
+import numpy, time
 
-class Labirynt():
+'''Labirynt_V3
+nowsza wersja poprzedniego labiryntu, program wyznacza sciezke w labiryncie 
+z punktu startowego "@" do punktu koncowego "$". Przebyta droge zaznacza "*" 
+WAZNE: Programowi daleko do optymalnosci - nie wykorzystuje on rekurencji!'''
+
+class Labirynt:
     def __init__(self):
-        self.lab_str = ''
-        self.lab_tab = []
-        self.wyjscie = [0][0]
-        temp = ''
-        i = ''
-        liczba = 0
-        while read_data[0][liczba] != ' ':
-            print read_data[0][liczba]
-            temp += read_data[0][liczba]
-            liczba += 1
-            #print temp
-        liczba += 1
-        self.wysokosc = int(temp)
-        temp = ''
-        while read_data[0][liczba] != '\n':
-            temp += read_data[0][liczba]
-            liczba += 1
-            #print temp
-        self.szerokosc = int(temp)
-        print self.szerokosc, self.wysokosc
+        with open('labirynt6.txt') as f:
+            self.lines = f.readlines()
+            self.done = False
+        self.tab = []
+        #print self.lines
         
-        self.pozycja = [int(self.wysokosc)][int(self.szerokosc)]
-        print self.szerokosc,self.wysokosc,'szer i wys'
-        for i in range(0, len(read_data)):
-            j = 0
-            while j < len(read_data[i]):
-                #print read_data[i][j]  
-                self.pozycja[i][j] = read_data[i][j]                  
-                self.lab_str += str(read_data[i][j])
-#                 if read_data[i][j] == '$':
-#                     self.wyjscie = read_data[i][j]
-#                 if read_data[i][j] == '@': 
-#                     self.pozycja = read_data[i][j]
-#                     self.x = i
-#                     self.y = j
-#                 if read_data[i][j] == 'n':
-#                     self.lab_str += '\n'
-#                     j = 100
-                j += 1
-            if i >= 1:
-                #print read_data[i]
-                self.lab_tab.append(read_data[i])
-            self.lab_tab = self.lab_tab
-        print self.pozycja
-        #print self.lab_str
-        #print self.lab_tab
-        
-    def printt(self):
-        print self.lab_tab
+    def findstart(self):
+        '''Funkcja znajdujaca start "@" '''
+        x = self.lines[0]
+        wys = ''
+        szer = ''
+        bl = True
+        for i in range(len(x)):
+            if x[i] <> ' ' and bl == True:
+                wys = wys + x[i]
+            if x[i] == ' ' and bl == True:
+                bl = False
+            if x[i] <> ' ' and bl == False:
+                szer = szer + x[i]
+        wys = int(wys)
+        szer = int(szer)
+        x = numpy.empty((szer, wys), dtype=object)
+        for i in range(1,wys+1):
+            for j in range(szer):
+                if self.lines[i][j] == '@':
+                    poczatek = [i,j]
+                x[j][i-1] = str(self.lines[i][j])
+        self.start = poczatek
+        self.lines = x
+        poczatek[0], poczatek [1] = poczatek[1], poczatek[0]
+        poczatek[1] -= 1
+        self.position = poczatek
+        return poczatek
+    
+    def find_path_no_recursion(self):
+        '''funkcja niewykorzystujaca rekurencji - zapamietuje wyjscia
+        z kazdej pozycji i wrzuca je do listy, potem rusuje droge 
+        pobierajac wspolrzedne ostatniej wolnej lokacji'''
+        #print self.tab
+        temp = []
+        x = self.position[0]
+        y = self.position[1]
+        if self.lines[x+1][y] == ' ':
+            temp.append(x+1)
+            temp.append(y)
+            self.tab.append(temp)
+            temp = []
+        if self.lines[x][y-1] == ' ':
+            temp.append(x)
+            temp.append(y-1)
+            self.tab.append(temp)
+            temp = []
+        if self.lines[x-1][y] == ' ':
+            temp.append(x-1)
+            temp.append(y)
+            self.tab.append(temp)
+            temp = []
+        if self.lines[x][y+1] == ' ':
+            temp.append(x)
+            temp.append(y+1)
+            self.tab.append(temp)
+            temp = []
+            
+        while len(self.tab) != 0:
+            self.position = self.tab.pop()
+            x = self.position[0]
+            y = self.position[1]
+            self.lines[x][y] = '*'
+            temp = []
+            if self.lines[x+1][y] == ' ':
+                temp.append(x+1)
+                temp.append(y)
+                self.tab.append(temp)
+                temp = []
+            if self.lines[x][y-1] == ' ':
+                temp.append(x)
+                temp.append(y-1)
+                self.tab.append(temp)
+                temp = []
+            if self.lines[x-1][y] == ' ':
+                temp.append(x-1)
+                temp.append(y)
+                self.tab.append(temp)
+                temp = []
+            if self.lines[x][y+1] == ' ':
+                temp.append(x)
+                temp.append(y+1)
+                self.tab.append(temp)
+                temp = []
+            if self.lines[x+1][y] == '$' or self.lines[x][y-1] == '$' or self.lines[x-1][y] == '$' or self.lines[x][y+1] == '$':
+                return 'UDALO SIE ZNALEZC WYJSCIE Z LABIRYNTU',self.lines
 
-    def lewo(self):
-        self.pozycja = self.pozycja[self.x-1][self.y]
-        self.x = self.x - 1
-        self.lab_tab[self.pozycja] = '*'
-    def prawo(self):
-        self.pozycja = self.pozycja[self.x+1][self.y]
-        self.x = self.x + 1
-        self.lab_tab[self.pozycja] = '*'
-    def gora(self):
-        self.pozycja = self.pozycja[self.x][self.y-1]
-        self.y = self.y - 1
-        self.lab_tab[self.pozycja] = '*'
-    def dol(self):
-        self.pozycja = self.pozycja[self.x][self.y+1]
-        self.y = self.y + 1
-        self.lab_tab[self.pozycja] = '*'
-        
-    def find(self):
-        while self.wyjscie != self.pozycja:
-            if self.pozycja[self.x+1][self.y] != '#' or self.pozycja[self.x+1][self.y] != '*' or self.pozycja[self.x+1][self.y] != '@':
-                self.prawo()
-            if self.pozycja[self.x][self.y+1] != '#' or self.pozycja[self.x][self.y+1] != '*' or self.pozycja[self.x][self.y+1] != '@':
-                self.dol()
-            if self.pozycja[self.x-1][self.y] != '#' or self.pozycja[self.x-1][self.y] != '*' or self.pozycja[self.x-1][self.y] != '@':
-                self.lewo()
-            if self.pozycja[self.x][self.y-1] != '#' or self.pozycja[self.x][self.y-1] != '*' or self.pozycja[self.x][self.y-1] != '@':
-                self.gora()
-            if self.pozycja[self.x+1][self.y] != '#':
-                self.prawo()
-            if self.pozycja[self.x][self.y+1] != '#':
-                self.dol()
-            if self.pozycja[self.x-1][self.y] != '#':
-                self.lewo()
-            if self.pozycja[self.x][self.y-1] != '#':
-                self.gora()
-        for i in self.lab_tab:
-            print 'tu dziala?',i
-        
-        
-        
-L1 = Labirynt()
-L1.printt()
-# L1.find()
+t1 = time.time()
+L1=Labirynt()
+L1.findstart()
+L1.find_path_no_recursion()
+#L1.findpath()
+print time.time() - t1
+    
+    
+
+    
+
+    
+    
